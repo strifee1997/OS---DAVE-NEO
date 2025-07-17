@@ -628,13 +628,17 @@ document.addEventListener('DOMContentLoaded', function() {
         gantt.forEach(block => {
             const duration = block.end - block.start;
             const blockElement = document.createElement('div');
-            blockElement.className = `gantt-block queue-${block.queue}`;
+            blockElement.className = `gantt-block queue-${block.queue} animated`;
             blockElement.innerHTML = `
-             <div>${block.process}</div>
+            <div>${block.process}</div>
             <div class="gantt-time">${block.start}</div>
-            `;
-            blockElement.style.flex = `${duration} 0 0`;
-            ganttChart.appendChild(blockElement);
+                `;
+
+            blockElement.style.minWidth = '0'; 
+            blockElement.style.width = `${duration * 60}px`; 
+            blockElement.style.animationDuration = `${duration * 500}ms`;
+
+ganttChart.appendChild(blockElement);
             
             if (block.end > maxTime) maxTime = block.end;
         });
