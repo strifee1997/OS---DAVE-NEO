@@ -106,6 +106,20 @@ button.removeBtn:hover {
     font-size: 0.8rem;
     color: #666;
 }
+@keyframes growBar {
+    from {
+        width: 0;
+    }
+    to {
+        width: 100%;
+    }
+}
+
+.gantt-block.animated {
+    width: 0;
+    overflow: hidden;
+    animation: growBar linear forwards;
+}
 .queue-0 { background-color: #ffcccc; } /* Q0 - Highest priority */
 .queue-1 { background-color: #ccffcc; } /* Q1 */
 .queue-2 { background-color: #ccccff; } /* Q2 */
