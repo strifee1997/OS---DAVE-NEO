@@ -630,8 +630,8 @@ document.addEventListener('DOMContentLoaded', function() {
             const blockElement = document.createElement('div');
             blockElement.className = `gantt-block queue-${block.queue}`;
             blockElement.innerHTML = `
-                <div>${block.process}</div>
-                <div class="gantt-time">${block.start}</div>
+             <div>${block.process}</div>
+            <div class="gantt-time">${block.start}</div>
             `;
             blockElement.style.flex = `${duration} 0 0`;
             ganttChart.appendChild(blockElement);
