@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CPU Scheduling Simulator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>CPU Scheduling Simulator</h1>
+            <p>Simulate FCFS, SJF, SRTF, RR, and MLFQ scheduling algorithms</p>
+        </header>
+        
+        <!-- Process Input Section -->
+        <div class="section">
+            <h2>Processes</h2>
+            <div class="instructions">
+                <p><strong>Instructions:</strong> Add processes with their arrival times and burst times. Use the buttons below to add, remove, or generate random processes.</p>
+            </div>
+            <table id="processTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Arrival Time</th>
+                        <th>Burst Time</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>P0</td>
+                        <td><input type="number" class="arrival" value="0" min="0"></td>
+                        <td><input type="number" class="burst" value="5" min="1"></td>
+                        <td><button class="removeBtn">Remove</button></td>
+                    </tr>
+                    <tr>
+                        <td>P1</td>
+                        <td><input type="number" class="arrival" value="1" min="0"></td>
+                        <td><input type="number" class="burst" value="3" min="1"></td>
+                        <td><button class="removeBtn">Remove</button></td>
+                    </tr>
+                    <tr>
+                        <td>P2</td>
+                        <td><input type="number" class="arrival" value="2" min="0"></td>
+                        <td><input type="number" class="burst" value="8" min="1"></td>
+                        <td><button class="removeBtn">Remove</button></td>
+                    </tr>
+                </tbody>
+            </table>
+            <button id="addProcess">Add Process</button>
+            <button id="generateRandom">Generate Random Processes</button>
+        </div>
+        
+        <!-- Algorithm Selection -->
+        <div class="section">
+            <h2>Scheduling Algorithm</h2>
+            <select id="algorithm">
+                <option value="FCFS">First-Come First-Served (FCFS)</option>
+                <option value="SJF">Shortest Job First (SJF) - Non-preemptive</option>
+                <option value="SRTF">Shortest Remaining Time First (SRTF) - Preemptive</option>
+                <option value="RR">Round Robin (RR)</option>
+                <option value="MLFQ">Multilevel Feedback Queue (MLFQ)</option>
+            </select>
+            
+            <div id="quantumSection" style="display:none; margin-top:15px;">
+                <label>Time Quantum: </label>
+                <input type="number" id="quantum" value="2" min="1">
+            </div>
+            
+            <div id="mlfqControls" class="mlfq-controls">
+                <h3>MLFQ Parameters</h3>
+                <p>Configure the time quantum and allotment time for each queue:</p>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Queue</th>
+                            <th>Time Quantum</th>
+                            <th>Allotment Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Q0 (Highest Priority)</td>
+                            <td><input type="number" class="mlfq-quantum" value="2" min="1"></td>
+                            <td><input type="number" class="mlfq-allotment" value="5" min="1"></td>
+                        </tr>
+                        <tr>
+                            <td>Q1</td>
+                            <td><input type="number" class="mlfq-quantum" value="4" min="1"></td>
+                            <td><input type="number" class="mlfq-allotment" value="10" min="1"></td>
+                        </tr>
+                        <tr>
+                            <td>Q2</td>
+                            <td><input type="number" class="mlfq-quantum" value="8" min="1"></td>
+                            <td><input type="number" class="mlfq-allotment" value="15" min="1"></td>
+                        </tr>
+                        <tr>
+                            <td>Q3 (Lowest Priority)</td>
+                            <td><input type="number" class="mlfq-quantum" value="9999" min="1" readonly></td>
+                            <td><input type="number" class="mlfq-allotment" value="9999" min="1" readonly></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="algorithm-info" id="algorithmInfo">
+                <strong>FCFS (First-Come First-Served):</strong> Processes are executed in the order they arrive. Simple but may result in long waiting times for short processes.
+            </div>
+        </div>
+        
+        <!-- Results Section -->
+        <div class="section results-section">
+            <h2>Simulation Results</h2>
+            <button id="runSimulation">Run Simulation</button>
+            
+            <div id="ganttContainer">
+                <h3>Gantt Chart</h3>
+                <div id="queueLegend" class="queue-legend"></div>
+                <div id="ganttChart" class="gantt-chart"></div>
+                <div class="time-label" id="timeLabels"></div>
+            </div>
+            
+            <h3>Process Metrics</h3>
+            <table id="metricsTable">
+                <thead>
+                    <tr>
+                        <th>Process ID</th>
+                        <th>Arrival Time</th>
+                        <th>Burst Time</th>
+                        <th>Completion Time</th>
+                        <th>Turnaround Time</th>
+                        <th>Waiting Time</th>
+                        <th>Response Time</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            
+            <div class="metrics-summary">
+                <div class="metric-card">
+                    <div class="metric-value" id="avgTurnaround">0.00</div>
+                    <div class="metric-label">Average Turnaround Time</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="avgWaiting">0.00</div>
+                    <div class="metric-label">Average Waiting Time</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="avgResponse">0.00</div>
+                    <div class="metric-label">Average Response Time</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
