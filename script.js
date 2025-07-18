@@ -151,10 +151,10 @@ document.addEventListener('DOMContentLoaded', function() {
     resetProcessBtn.addEventListener('click', function () {
     const tbody = processTable.querySelector('tbody');
     
-    // Clear all rows
+    // Clear all process rows
     tbody.innerHTML = '';
 
-    // Optionally add just one row to avoid empty state
+    // Add one default process row
     const defaultRow = document.createElement('tr');
     defaultRow.innerHTML = `
         <td>P0</td>
@@ -164,7 +164,7 @@ document.addEventListener('DOMContentLoaded', function() {
     `;
     tbody.appendChild(defaultRow);
 
-    // Add remove button event to the default row
+    // Add event to Remove button
     defaultRow.querySelector('.removeBtn').addEventListener('click', function () {
         if (tbody.rows.length > 1) {
             defaultRow.remove();
@@ -174,39 +174,20 @@ document.addEventListener('DOMContentLoaded', function() {
             alert('You need at least one process!');
         }
     });
+
+    // Clear Gantt chart
+    document.getElementById('ganttChart').innerHTML = '';
+    document.getElementById('timeLabels').innerHTML = '';
+
+    // Clear metrics table
+    document.querySelector('#metricsTable tbody').innerHTML = '';
+
+    // Reset average metrics
+    document.getElementById('avgTurnaround').textContent = '0.00';
+    document.getElementById('avgWaiting').textContent = '0.00';
+    document.getElementById('avgResponse').textContent = '0.00';
 });
 
-    //Reset Function
-    const resetProcessBtn = document.getElementById('resetProcess');
-
-    resetProcessBtn.addEventListener('click', function () {
-    const tbody = processTable.querySelector('tbody');
-    
-    // Clear all rows
-    tbody.innerHTML = '';
-
-    // Optionally add just one row to avoid empty state
-    const defaultRow = document.createElement('tr');
-    defaultRow.innerHTML = `
-        <td>P0</td>
-        <td><input type="number" class="arrival" value="0" min="0"></td>
-        <td><input type="number" class="burst" value="5" min="1"></td>
-        <td><button class="removeBtn">Remove</button></td>
-    `;
-    tbody.appendChild(defaultRow);
-
-    // Add remove button event to the default row
-    defaultRow.querySelector('.removeBtn').addEventListener('click', function () {
-        if (tbody.rows.length > 1) {
-            defaultRow.remove();
-            const rows = tbody.querySelectorAll('tr');
-            rows.forEach((r, i) => r.cells[0].textContent = `P${i}`);
-        } else {
-            alert('You need at least one process!');
-        }
-    });
-});
-    
     // Run simulation
     runSimulationBtn.addEventListener('click', function() {
         // Get processes
