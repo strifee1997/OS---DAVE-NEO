@@ -10,6 +10,10 @@ body {
     margin: 0 auto;
     padding: 20px;
 }
+.gantt-container {
+    position: relative;
+    height: 120px; /* Space for both rows */
+}
 header {
     text-align: center;
     margin-bottom: 30px;
@@ -80,32 +84,25 @@ button.removeBtn:hover {
     background-color: #0da271;
 }
 .gantt-chart {
-    display: flex;
-    min-width: 100%;
-    margin: 20px 0;
+    width: 100%;
     overflow-x: auto;
+    position: relative;
+    padding-top: 30px;
     background: white;
-    padding: 10px;
     border-radius: 5px;
     border: 1px solid #e1e5eb;
-    transform: translateZ(0); /* Hardware acceleration */
+    margin: 20px 0;
 }
 /* Update Gantt block styles */
 .gantt-block {
-    box-sizing: border-box;
-    flex-shrink: 0;
-    padding: 15px;
-    border: 1px solid #333;
-    text-align: center;
-    background-color: #f0f0f0;
-    min-width: 0; /* Changed from 60px */
-    font-weight: 500;
-    position: relative;
-    margin-right: 2px;
-    height: 60px;
+    position: absolute;
+    height: 50px;
     transition: width linear;
     will-change: width;
+    border: 1px solid #333;
+    box-sizing: border-box;
     overflow: hidden;
+    background-color: #f0f0f0;
 }
 .gantt-time {
     position: absolute;
@@ -198,6 +195,11 @@ button.removeBtn:hover {
     height: 20px;
     margin-top: 10px;
 }
+.time-label-row, .gantt-row {
+    position: relative;
+    height: 60px;
+    white-space: nowrap;
+}
 .time-label span {
     display: inline-block;
     width: 60px; /* Match Gantt block width per time unit */
@@ -206,13 +208,17 @@ button.removeBtn:hover {
 
 .time-mark {
     position: absolute;
+    bottom: 0;
     transform: translateX(-50%);
     font-size: 12px;
     color: #666;
+    width: 20px;
+    text-align: center;
 }
 .process-id {
     text-align: center;
     padding-top: 10px;
+    font-weight: 500;
 }
 
 .start-time {
