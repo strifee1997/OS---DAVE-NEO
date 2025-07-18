@@ -81,15 +81,19 @@ button.removeBtn:hover {
 }
 .gantt-chart {
     display: flex;
+    min-width: 100%;
     margin: 20px 0;
     overflow-x: auto;
     background: white;
     padding: 10px;
     border-radius: 5px;
     border: 1px solid #e1e5eb;
+    transform: translateZ(0); /* Hardware acceleration */
 }
 /* Update Gantt block styles */
 .gantt-block {
+    box-sizing: border-box;
+    flex-shrink: 0;
     padding: 15px;
     border: 1px solid #333;
     text-align: center;
@@ -99,7 +103,7 @@ button.removeBtn:hover {
     position: relative;
     margin-right: 2px;
     height: 60px;
-    transition: width 0.3s ease-out, opacity 0.3s ease-out;
+    transition: width linear;
     will-change: width;
     overflow: hidden;
 }
