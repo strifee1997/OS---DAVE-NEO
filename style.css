@@ -103,7 +103,10 @@ button.removeBtn:hover {
     box-sizing: border-box;
     overflow: hidden;
     background-color: #f0f0f0;
+    transition-timing-function: linear !important;
+    transition-property: width !important;
 }
+
 .gantt-time {
     position: absolute;
     bottom: -20px;
@@ -243,4 +246,20 @@ button.removeBtn:hover {
     margin: 15px 0;
     border-left: 4px solid #4a6cf7;
 }
-/* style.css (updated animation styles) */
+.speed-control {
+    margin: 10px 0;
+    padding: 8px;
+    background: #f5f5f5;
+    border-radius: 4px;
+    display: inline-block;
+}
+
+.speed-control label {
+    margin-right: 8px;
+}
+
+.speed-control select {
+    padding: 4px;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+}
