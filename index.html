@@ -113,7 +113,15 @@
         <div class="section results-section">
             <h2>Simulation Results</h2>
             <button id="runSimulation">Run Simulation</button>
-            
+
+            <div class="speed-control">
+    <label>Animation Speed: </label>
+    <select id="animationSpeed">
+        <option value="2">0.5x Slow</option>
+        <option value="1" selected>1x Normal</option>
+        <option value="0.5">2x Fast</option>
+    </select>
+</div>
             <div id="ganttContainer">
                 <h3>Gantt Chart</h3>
                 <div id="queueLegend" class="queue-legend"></div>
