@@ -651,19 +651,15 @@ document.addEventListener('DOMContentLoaded', function() {
         return {gantt, metrics};
     }
     
-    // Display results
-    // Updated displayResults function with real-time animation
+    // Updated displayResults() with precise time labels
     function displayResults(gantt, metrics) {
         // Clear previous results
         ganttChart.innerHTML = '';
         metricsTable.querySelector('tbody').innerHTML = '';
         timeLabels.innerHTML = '';
-        
-        // Display metrics
-        let totalTurnaround = 0;
-        let totalWaiting = 0;
-        let totalResponse = 0;
-        
+
+        // Display metrics (unchanged)
+        let totalTurnaround = 0, totalWaiting = 0, totalResponse = 0;
         metrics.forEach(metric => {
             const row = document.createElement('tr');
             row.innerHTML = `
@@ -676,59 +672,60 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td>${metric.response}</td>
             `;
             metricsTable.querySelector('tbody').appendChild(row);
-            
             totalTurnaround += metric.turnaround;
             totalWaiting += metric.waiting;
             totalResponse += metric.response;
         });
-        
-        // Calculate and display averages
-        const count = metrics.length;
-        document.getElementById('avgTurnaround').textContent = 
-            (totalTurnaround / count).toFixed(2);
-        document.getElementById('avgWaiting').textContent = 
-            (totalWaiting / count).toFixed(2);
-        document.getElementById('avgResponse').textContent = 
-            (totalResponse / count).toFixed(2);
 
-        // Real-time Gantt chart animation
+        // Calculate averages (unchanged)
+        const count = metrics.length;
+        document.getElementById('avgTurnaround').textContent = (totalTurnaround/count).toFixed(2);
+        document.getElementById('avgWaiting').textContent = (totalWaiting/count).toFixed(2);
+        document.getElementById('avgResponse').textContent = (totalResponse/count).toFixed(2);
+
+        // Real-time Gantt with precise time labels
         if (gantt.length === 0) {
             ganttChart.innerHTML = '<div class="gantt-block">No processes scheduled</div>';
             return;
         }
-        
-        const maxTime = Math.max(...gantt.map(block => block.end));
-        let cumulativeTime = 0;
-        
-        // Create time labels
-        for (let i = 0; i <= maxTime; i += Math.max(1, Math.floor(maxTime/10))) {
-            const span = document.createElement('span');
-            span.textContent = i;
-            timeLabels.appendChild(span);
-        }
-        
-    // Animate each block in sequence
-    gantt.forEach((block) => {
-        const blockElement = document.createElement('div');
-        blockElement.className = `gantt-block queue-${block.queue}`;
-        blockElement.innerHTML = `
-            <div class="gantt-process">${block.process}</div>
-            <div class="gantt-time">${block.start}</div>
-        `;
-        
-        // Initial state
-        blockElement.style.width = '0';
-        blockElement.style.flexShrink = '0'; // Prevent shrinking
-        ganttChart.appendChild(blockElement);
 
-        const duration = block.end - block.start;
+        const maxTime = Math.max(...gantt.map(block => block.end));
+        const pxPerTimeUnit = 60; // Match CSS width calculation
         
-        setTimeout(() => {
-            blockElement.style.transition = `width ${duration}s linear`;
-            blockElement.style.width = `${duration * 60}px`;
-        }, cumulativeTime * 1000);
-        
-        cumulativeTime += duration;
-    });
-}
+        // Generate accurate time labels
+        timeLabels.style.width = `${maxTime * pxPerTimeUnit}px`;
+        for (let t = 0; t <= maxTime; t++) {
+            const timeMark = document.createElement('div');
+            timeMark.className = 'time-mark';
+            timeMark.textContent = t;
+            timeMark.style.left = `${t * pxPerTimeUnit}px`;
+            timeLabels.appendChild(timeMark);
+        }
+
+        // Animate Gantt blocks
+        let cumulativeTime = 0;
+        gantt.forEach(block => {
+            const blockElement = document.createElement('div');
+            blockElement.className = `gantt-block queue-${block.queue}`;
+            blockElement.innerHTML = `
+                <div class="process-id">${block.process}</div>
+                <div class="start-time">${block.start}</div>
+            `;
+            
+            // Initial state
+            blockElement.style.width = '0';
+            blockElement.style.opacity = '0.8';
+            ganttChart.appendChild(blockElement);
+
+            const duration = block.end - block.start;
+            
+            setTimeout(() => {
+                blockElement.style.transition = `width ${duration}s linear`;
+                blockElement.style.width = `${duration * pxPerTimeUnit}px`;
+                blockElement.style.opacity = '1';
+            }, cumulativeTime * 1000);
+            
+            cumulativeTime += duration;
+        });
+    }
 });
