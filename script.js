@@ -707,30 +707,28 @@ document.addEventListener('DOMContentLoaded', function() {
             timeLabels.appendChild(span);
         }
         
-        // Animate each block in sequence
-        gantt.forEach((block) => {
-            const blockElement = document.createElement('div');
-            blockElement.className = `gantt-block queue-${block.queue}`;
-            blockElement.innerHTML = `
-                <div>${block.process}</div>
-                <div class="gantt-time">${block.start}</div>
-            `;
-            
-            // Initial state
-            blockElement.style.width = '0';
-            blockElement.style.opacity = '0.6';
-            ganttChart.appendChild(blockElement);
+    // Animate each block in sequence
+    gantt.forEach((block) => {
+        const blockElement = document.createElement('div');
+        blockElement.className = `gantt-block queue-${block.queue}`;
+        blockElement.innerHTML = `
+            <div class="gantt-process">${block.process}</div>
+            <div class="gantt-time">${block.start}</div>
+        `;
+        
+        // Initial state
+        blockElement.style.width = '0';
+        blockElement.style.flexShrink = '0'; // Prevent shrinking
+        ganttChart.appendChild(blockElement);
 
-            const duration = block.end - block.start;
-            
-            // Animate after delay matching previous blocks' durations
-            setTimeout(() => {
-                blockElement.style.transition = `width ${duration}s linear, opacity 0.5s ease`;
-                blockElement.style.width = `${duration * 60}px`;
-                blockElement.style.opacity = '1';
-            }, cumulativeTime * 1000);
-            
-            cumulativeTime += duration;
-        });
-    }
+        const duration = block.end - block.start;
+        
+        setTimeout(() => {
+            blockElement.style.transition = `width ${duration}s linear`;
+            blockElement.style.width = `${duration * 60}px`;
+        }, cumulativeTime * 1000);
+        
+        cumulativeTime += duration;
+    });
+}
 });
