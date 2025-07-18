@@ -478,6 +478,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Updated displayResults with synchronized scrolling
     function displayResults(gantt, metrics) {
+        const speedFactor = parseFloat(document.getElementById('animationSpeed').value);
         ganttChart.innerHTML = '';
         metricsTable.querySelector('tbody').innerHTML = '';
         timeLabels.innerHTML = '';
@@ -556,10 +557,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const duration = block.end - block.start;
             
-            setTimeout(() => {
-                blockElement.style.transition = `width ${duration}s linear`;
-                blockElement.style.width = `${duration * pxPerTimeUnit}px`;
-            }, cumulativeTime * 1000);
+    setTimeout(() => {
+        blockElement.style.transition = `width ${duration * speedFactor}s linear`;
+        blockElement.style.width = `${duration * pxPerTimeUnit}px`;
+    }, cumulativeTime * (1000 * speedFactor));
             
             cumulativeTime += duration;
         });
