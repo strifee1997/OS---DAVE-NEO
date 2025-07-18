@@ -145,48 +145,45 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    //Reset Function
+    // Reset Function
     const resetProcessBtn = document.getElementById('resetProcess');
+    resetProcessBtn.addEventListener('click', function() {
+        const tbody = processTable.querySelector('tbody');
+        tbody.innerHTML = '';
 
-    resetProcessBtn.addEventListener('click', function () {
-    const tbody = processTable.querySelector('tbody');
-    
-    // Clear all process rows
-    tbody.innerHTML = '';
+        // Add one default process row
+        const defaultRow = document.createElement('tr');
+        defaultRow.innerHTML = `
+            <td>P0</td>
+            <td><input type="number" class="arrival" value="0" min="0"></td>
+            <td><input type="number" class="burst" value="5" min="1"></td>
+            <td><button class="removeBtn">Remove</button></td>
+        `;
+        tbody.appendChild(defaultRow);
 
-    // Add one default process row
-    const defaultRow = document.createElement('tr');
-    defaultRow.innerHTML = `
-        <td>P0</td>
-        <td><input type="number" class="arrival" value="0" min="0"></td>
-        <td><input type="number" class="burst" value="5" min="1"></td>
-        <td><button class="removeBtn">Remove</button></td>
-    `;
-    tbody.appendChild(defaultRow);
+        // Add event to Remove button
+        defaultRow.querySelector('.removeBtn').addEventListener('click', function() {
+            if (tbody.rows.length > 1) {
+                defaultRow.remove();
+                const rows = tbody.querySelectorAll('tr');
+                rows.forEach((r, i) => r.cells[0].textContent = `P${i}`);
+            } else {
+                alert('You need at least one process!');
+            }
+        });
 
-    // Add event to Remove button
-    defaultRow.querySelector('.removeBtn').addEventListener('click', function () {
-        if (tbody.rows.length > 1) {
-            defaultRow.remove();
-            const rows = tbody.querySelectorAll('tr');
-            rows.forEach((r, i) => r.cells[0].textContent = `P${i}`);
-        } else {
-            alert('You need at least one process!');
-        }
+        // Clear Gantt chart
+        document.getElementById('ganttChart').innerHTML = '';
+        document.getElementById('timeLabels').innerHTML = '';
+
+        // Clear metrics table
+        document.querySelector('#metricsTable tbody').innerHTML = '';
+
+        // Reset average metrics
+        document.getElementById('avgTurnaround').textContent = '0.00';
+        document.getElementById('avgWaiting').textContent = '0.00';
+        document.getElementById('avgResponse').textContent = '0.00';
     });
-
-    // Clear Gantt chart
-    document.getElementById('ganttChart').innerHTML = '';
-    document.getElementById('timeLabels').innerHTML = '';
-
-    // Clear metrics table
-    document.querySelector('#metricsTable tbody').innerHTML = '';
-
-    // Reset average metrics
-    document.getElementById('avgTurnaround').textContent = '0.00';
-    document.getElementById('avgWaiting').textContent = '0.00';
-    document.getElementById('avgResponse').textContent = '0.00';
-});
 
     // Run simulation
     runSimulationBtn.addEventListener('click', function() {
@@ -655,43 +652,12 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     // Display results
+    // Updated displayResults function with real-time animation
     function displayResults(gantt, metrics) {
         // Clear previous results
         ganttChart.innerHTML = '';
         metricsTable.querySelector('tbody').innerHTML = '';
         timeLabels.innerHTML = '';
-        
-        // Display Gantt chart
-        if (gantt.length === 0) {
-            ganttChart.innerHTML = '<div class="gantt-block">No processes scheduled</div>';
-            return;
-        }
-        
-        let maxTime = 0;
-        gantt.forEach(block => {
-            const duration = block.end - block.start;
-            const blockElement = document.createElement('div');
-            blockElement.className = `gantt-block queue-${block.queue} animated`;
-            blockElement.innerHTML = `
-            <div>${block.process}</div>
-            <div class="gantt-time">${block.start}</div>
-                `;
-
-            blockElement.style.minWidth = '0'; 
-            blockElement.style.width = `${duration * 60}px`; 
-            blockElement.style.animationDuration = `${duration * 500}ms`;
-
-ganttChart.appendChild(blockElement);
-            
-            if (block.end > maxTime) maxTime = block.end;
-        });
-        
-        // Add time labels
-        for (let i = 0; i <= maxTime; i += Math.max(1, Math.floor(maxTime/10))) {
-            const span = document.createElement('span');
-            span.textContent = i;
-            timeLabels.appendChild(span);
-        }
         
         // Display metrics
         let totalTurnaround = 0;
@@ -724,5 +690,47 @@ ganttChart.appendChild(blockElement);
             (totalWaiting / count).toFixed(2);
         document.getElementById('avgResponse').textContent = 
             (totalResponse / count).toFixed(2);
+
+        // Real-time Gantt chart animation
+        if (gantt.length === 0) {
+            ganttChart.innerHTML = '<div class="gantt-block">No processes scheduled</div>';
+            return;
+        }
+        
+        const maxTime = Math.max(...gantt.map(block => block.end));
+        let cumulativeTime = 0;
+        
+        // Create time labels
+        for (let i = 0; i <= maxTime; i += Math.max(1, Math.floor(maxTime/10))) {
+            const span = document.createElement('span');
+            span.textContent = i;
+            timeLabels.appendChild(span);
+        }
+        
+        // Animate each block in sequence
+        gantt.forEach((block) => {
+            const blockElement = document.createElement('div');
+            blockElement.className = `gantt-block queue-${block.queue}`;
+            blockElement.innerHTML = `
+                <div>${block.process}</div>
+                <div class="gantt-time">${block.start}</div>
+            `;
+            
+            // Initial state
+            blockElement.style.width = '0';
+            blockElement.style.opacity = '0.6';
+            ganttChart.appendChild(blockElement);
+
+            const duration = block.end - block.start;
+            
+            // Animate after delay matching previous blocks' durations
+            setTimeout(() => {
+                blockElement.style.transition = `width ${duration}s linear, opacity 0.5s ease`;
+                blockElement.style.width = `${duration * 60}px`;
+                blockElement.style.opacity = '1';
+            }, cumulativeTime * 1000);
+            
+            cumulativeTime += duration;
+        });
     }
 });
