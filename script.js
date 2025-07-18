@@ -144,6 +144,68 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     });
+
+    //Reset Function
+    const resetProcessBtn = document.getElementById('resetProcess');
+
+    resetProcessBtn.addEventListener('click', function () {
+    const tbody = processTable.querySelector('tbody');
+    
+    // Clear all rows
+    tbody.innerHTML = '';
+
+    // Optionally add just one row to avoid empty state
+    const defaultRow = document.createElement('tr');
+    defaultRow.innerHTML = `
+        <td>P0</td>
+        <td><input type="number" class="arrival" value="0" min="0"></td>
+        <td><input type="number" class="burst" value="5" min="1"></td>
+        <td><button class="removeBtn">Remove</button></td>
+    `;
+    tbody.appendChild(defaultRow);
+
+    // Add remove button event to the default row
+    defaultRow.querySelector('.removeBtn').addEventListener('click', function () {
+        if (tbody.rows.length > 1) {
+            defaultRow.remove();
+            const rows = tbody.querySelectorAll('tr');
+            rows.forEach((r, i) => r.cells[0].textContent = `P${i}`);
+        } else {
+            alert('You need at least one process!');
+        }
+    });
+});
+
+    //Reset Function
+    const resetProcessBtn = document.getElementById('resetProcess');
+
+    resetProcessBtn.addEventListener('click', function () {
+    const tbody = processTable.querySelector('tbody');
+    
+    // Clear all rows
+    tbody.innerHTML = '';
+
+    // Optionally add just one row to avoid empty state
+    const defaultRow = document.createElement('tr');
+    defaultRow.innerHTML = `
+        <td>P0</td>
+        <td><input type="number" class="arrival" value="0" min="0"></td>
+        <td><input type="number" class="burst" value="5" min="1"></td>
+        <td><button class="removeBtn">Remove</button></td>
+    `;
+    tbody.appendChild(defaultRow);
+
+    // Add remove button event to the default row
+    defaultRow.querySelector('.removeBtn').addEventListener('click', function () {
+        if (tbody.rows.length > 1) {
+            defaultRow.remove();
+            const rows = tbody.querySelectorAll('tr');
+            rows.forEach((r, i) => r.cells[0].textContent = `P${i}`);
+        } else {
+            alert('You need at least one process!');
+        }
+    });
+});
     
     // Run simulation
     runSimulationBtn.addEventListener('click', function() {
