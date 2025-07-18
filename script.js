@@ -50,14 +50,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const algo = this.value;
         algorithmInfo.textContent = algorithmDescriptions[algo];
         
-        // Show/hide quantum input based on algorithm
         if (algo === 'RR' || algo === 'MLFQ') {
             quantumSection.style.display = 'block';
         } else {
             quantumSection.style.display = 'none';
         }
         
-        // Show/hide MLFQ controls
         if (algo === 'MLFQ') {
             mlfqControls.style.display = 'block';
         } else {
@@ -65,18 +63,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Add event listeners to existing remove buttons
+    // Process table event listeners
     document.querySelectorAll('.removeBtn').forEach(btn => {
         btn.addEventListener('click', function() {
             const row = this.closest('tr');
             const tbody = row.parentElement;
             if (tbody.rows.length > 1) {
                 row.remove();
-                // Update process IDs
                 const rows = tbody.querySelectorAll('tr');
-                rows.forEach((r, i) => {
-                    r.cells[0].textContent = `P${i}`;
-                });
+                rows.forEach((r, i) => r.cells[0].textContent = `P${i}`);
             } else {
                 alert('You need at least one process!');
             }
@@ -97,16 +92,11 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
         
         tbody.appendChild(row);
-        
-        // Add event listener to new remove button
         row.querySelector('.removeBtn').addEventListener('click', function() {
             if (tbody.rows.length > 1) {
                 row.remove();
-                // Update process IDs
                 const rows = tbody.querySelectorAll('tr');
-                rows.forEach((r, i) => {
-                    r.cells[0].textContent = `P${i}`;
-                });
+                rows.forEach((r, i) => r.cells[0].textContent = `P${i}`);
             } else {
                 alert('You need at least one process!');
             }
@@ -117,7 +107,7 @@ document.addEventListener('DOMContentLoaded', function() {
     generateRandomBtn.addEventListener('click', function() {
         const tbody = processTable.querySelector('tbody');
         tbody.innerHTML = '';
-        const processCount = Math.floor(Math.random() * 5) + 3; // 3-7 processes
+        const processCount = Math.floor(Math.random() * 5) + 3;
         
         for (let i = 0; i < processCount; i++) {
             const row = document.createElement('tr');
@@ -128,16 +118,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 <td><button class="removeBtn">Remove</button></td>
             `;
             tbody.appendChild(row);
-            
-            // Add event listener to remove button
             row.querySelector('.removeBtn').addEventListener('click', function() {
                 if (tbody.rows.length > 1) {
                     row.remove();
-                    // Update process IDs
                     const rows = tbody.querySelectorAll('tr');
-                    rows.forEach((r, idx) => {
-                        r.cells[0].textContent = `P${idx}`;
-                    });
+                    rows.forEach((r, idx) => r.cells[0].textContent = `P${idx}`);
                 } else {
                     alert('You need at least one process!');
                 }
@@ -151,7 +136,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const tbody = processTable.querySelector('tbody');
         tbody.innerHTML = '';
 
-        // Add one default process row
         const defaultRow = document.createElement('tr');
         defaultRow.innerHTML = `
             <td>P0</td>
@@ -161,7 +145,6 @@ document.addEventListener('DOMContentLoaded', function() {
         `;
         tbody.appendChild(defaultRow);
 
-        // Add event to Remove button
         defaultRow.querySelector('.removeBtn').addEventListener('click', function() {
             if (tbody.rows.length > 1) {
                 defaultRow.remove();
@@ -172,14 +155,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
-        // Clear Gantt chart
-        document.getElementById('ganttChart').innerHTML = '';
-        document.getElementById('timeLabels').innerHTML = '';
-
-        // Clear metrics table
+        ganttChart.innerHTML = '';
+        timeLabels.innerHTML = '';
         document.querySelector('#metricsTable tbody').innerHTML = '';
-
-        // Reset average metrics
         document.getElementById('avgTurnaround').textContent = '0.00';
         document.getElementById('avgWaiting').textContent = '0.00';
         document.getElementById('avgResponse').textContent = '0.00';
@@ -187,84 +165,57 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Run simulation
     runSimulationBtn.addEventListener('click', function() {
-        // Get processes
         const processes = [];
         const rows = processTable.querySelectorAll('tbody tr');
         rows.forEach((row, i) => {
-            const arrival = parseInt(row.querySelector('.arrival').value);
-            const burst = parseInt(row.querySelector('.burst').value);
             processes.push({
                 id: `P${i}`,
-                arrival: arrival,
-                burst: burst,
-                remaining: burst,
+                arrival: parseInt(row.querySelector('.arrival').value),
+                burst: parseInt(row.querySelector('.burst').value),
+                remaining: parseInt(row.querySelector('.burst').value),
                 startTime: -1,
                 finishTime: -1,
                 responseTime: -1
             });
         });
         
-        // Get algorithm and parameters
         const algorithm = algorithmSelect.value;
         const quantum = algorithm === 'RR' || algorithm === 'MLFQ' ? 
             parseInt(document.getElementById('quantum').value) : 0;
         
-        // Run selected algorithm
         let results;
         switch (algorithm) {
-            case 'FCFS':
-                results = runFCFS([...processes]);
-                break;
-            case 'SJF':
-                results = runSJF([...processes]);
-                break;
-            case 'SRTF':
-                results = runSRTF([...processes]);
-                break;
-            case 'RR':
-                results = runRR([...processes], quantum);
-                break;
-            case 'MLFQ':
-                // Get MLFQ parameters
+            case 'FCFS': results = runFCFS([...processes]); break;
+            case 'SJF': results = runSJF([...processes]); break;
+            case 'SRTF': results = runSRTF([...processes]); break;
+            case 'RR': results = runRR([...processes], quantum); break;
+            case 'MLFQ': 
                 const mlfqParams = [];
-                const mlfqRows = mlfqControls.querySelectorAll('tbody tr');
-                mlfqRows.forEach(row => {
-                    const quantum = parseInt(row.querySelector('.mlfq-quantum').value);
-                    const allotment = parseInt(row.querySelector('.mlfq-allotment').value);
-                    mlfqParams.push({quantum, allotment});
+                document.querySelectorAll('#mlfqControls tbody tr').forEach(row => {
+                    mlfqParams.push({
+                        quantum: parseInt(row.querySelector('.mlfq-quantum').value),
+                        allotment: parseInt(row.querySelector('.mlfq-allotment').value)
+                    });
                 });
                 results = runMLFQ([...processes], mlfqParams);
                 break;
-            default:
-                results = {gantt: [], metrics: []};
+            default: results = {gantt: [], metrics: []};
         }
         
-        // Display results
         displayResults(results.gantt, results.metrics);
     });
     
     // Scheduling Algorithms
-    
-    // First-Come First-Served (FCFS)
     function runFCFS(processes) {
-        // Sort processes by arrival time
         processes.sort((a, b) => a.arrival - b.arrival);
-        
         let currentTime = 0;
-        const gantt = [];
-        const metrics = [];
+        const gantt = [], metrics = [];
         
         for (const process of processes) {
-            // If process hasn't arrived yet, wait for it
-            if (currentTime < process.arrival) {
-                currentTime = process.arrival;
-            }
-            
-            // Record start time
+            if (currentTime < process.arrival) currentTime = process.arrival;
             process.startTime = currentTime;
             process.responseTime = process.startTime - process.arrival;
             
-            // Execute process
             gantt.push({
                 process: process.id,
                 start: currentTime,
@@ -272,62 +223,39 @@ document.addEventListener('DOMContentLoaded', function() {
                 queue: 0
             });
             
-            // Update current time
             currentTime += process.burst;
-            
-            // Record finish time
             process.finishTime = currentTime;
-            
-            // Calculate metrics
-            const turnaround = process.finishTime - process.arrival;
-            const waiting = turnaround - process.burst;
             
             metrics.push({
                 id: process.id,
                 arrival: process.arrival,
                 burst: process.burst,
                 finish: process.finishTime,
-                turnaround: turnaround,
-                waiting: waiting,
+                turnaround: process.finishTime - process.arrival,
+                waiting: (process.finishTime - process.arrival) - process.burst,
                 response: process.responseTime
             });
         }
-        
         return {gantt, metrics};
     }
     
-    // Shortest Job First (SJF) - Non-preemptive
     function runSJF(processes) {
-        let currentTime = 0;
-        let completed = 0;
-        const gantt = [];
-        const metrics = [];
-        
-        // Initialize processes
+        let currentTime = 0, completed = 0;
+        const gantt = [], metrics = [];
         processes.forEach(p => p.remaining = p.burst);
         
         while (completed < processes.length) {
-            // Get arrived processes that haven't completed
-            const arrived = processes.filter(p => 
-                p.arrival <= currentTime && p.remaining > 0
-            );
+            const arrived = processes.filter(p => p.arrival <= currentTime && p.remaining > 0);
+            if (arrived.length === 0) { currentTime++; continue; }
             
-            if (arrived.length === 0) {
-                currentTime++;
-                continue;
-            }
-            
-            // Find the process with the shortest burst time
             arrived.sort((a, b) => a.remaining - b.remaining);
             const process = arrived[0];
             
-            // Record start time if not started
             if (process.startTime === -1) {
                 process.startTime = currentTime;
                 process.responseTime = process.startTime - process.arrival;
             }
             
-            // Execute the entire process (non-preemptive)
             gantt.push({
                 process: process.id,
                 start: currentTime,
@@ -340,63 +268,38 @@ document.addEventListener('DOMContentLoaded', function() {
             process.finishTime = currentTime;
             completed++;
             
-            // Calculate metrics
-            const turnaround = process.finishTime - process.arrival;
-            const waiting = turnaround - process.burst;
-            
             metrics.push({
                 id: process.id,
                 arrival: process.arrival,
                 burst: process.burst,
                 finish: process.finishTime,
-                turnaround: turnaround,
-                waiting: waiting,
+                turnaround: process.finishTime - process.arrival,
+                waiting: (process.finishTime - process.arrival) - process.burst,
                 response: process.responseTime
             });
         }
-        
         return {gantt, metrics};
     }
     
-    // Shortest Remaining Time First (SRTF) - Preemptive
     function runSRTF(processes) {
-        let currentTime = 0;
-        let completed = 0;
-        let lastProcess = null;
-        const gantt = [];
-        const metrics = [];
-        
-        // Initialize processes
+        let currentTime = 0, completed = 0, lastProcess = null;
+        const gantt = [], metrics = [];
         processes.forEach(p => p.remaining = p.burst);
         
         while (completed < processes.length) {
-            // Get arrived processes that haven't completed
-            const arrived = processes.filter(p => 
-                p.arrival <= currentTime && p.remaining > 0
-            );
+            const arrived = processes.filter(p => p.arrival <= currentTime && p.remaining > 0);
+            if (arrived.length === 0) { currentTime++; continue; }
             
-            if (arrived.length === 0) {
-                currentTime++;
-                continue;
-            }
-            
-            // Find the process with the shortest remaining time
             arrived.sort((a, b) => a.remaining - b.remaining);
             const process = arrived[0];
             
-            // Record start time if not started
             if (process.startTime === -1) {
                 process.startTime = currentTime;
                 process.responseTime = process.startTime - process.arrival;
             }
             
-            // Check if we need to create a new Gantt block
             if (!lastProcess || lastProcess.id !== process.id) {
-                if (lastProcess) {
-                    // End the last block
-                    gantt[gantt.length - 1].end = currentTime;
-                }
-                // Start a new block
+                if (lastProcess) gantt[gantt.length - 1].end = currentTime;
                 gantt.push({
                     process: process.id,
                     start: currentTime,
@@ -404,80 +307,49 @@ document.addEventListener('DOMContentLoaded', function() {
                     queue: 0
                 });
             } else {
-                // Extend the current block
                 gantt[gantt.length - 1].end = currentTime + 1;
             }
             
             lastProcess = process;
-            
-            // Execute for 1 time unit
             process.remaining--;
             currentTime++;
             
-            // Check if process completed
             if (process.remaining === 0) {
                 process.finishTime = currentTime;
                 completed++;
-                
-                // Calculate metrics
-                const turnaround = process.finishTime - process.arrival;
-                const waiting = turnaround - process.burst;
-                
                 metrics.push({
                     id: process.id,
                     arrival: process.arrival,
                     burst: process.burst,
                     finish: process.finishTime,
-                    turnaround: turnaround,
-                    waiting: waiting,
+                    turnaround: process.finishTime - process.arrival,
+                    waiting: (process.finishTime - process.arrival) - process.burst,
                     response: process.responseTime
                 });
             }
         }
-        
         return {gantt, metrics};
     }
     
-    // Round Robin (RR)
     function runRR(processes, quantum) {
-        let currentTime = 0;
-        let completed = 0;
-        const queue = [];
-        const gantt = [];
-        const metrics = [];
-        
-        // Initialize processes
-        processes.forEach(p => {
-            p.remaining = p.burst;
-            p.lastRun = -1;
-        });
+        let currentTime = 0, completed = 0;
+        const queue = [], gantt = [], metrics = [];
+        processes.forEach(p => { p.remaining = p.burst; p.lastRun = -1; });
         
         while (completed < processes.length) {
-            // Add arrived processes to the queue
             processes.forEach(p => {
-                if (p.arrival === currentTime && !queue.includes(p)) {
-                    queue.push(p);
-                }
+                if (p.arrival === currentTime && !queue.includes(p)) queue.push(p);
             });
             
-            if (queue.length === 0) {
-                currentTime++;
-                continue;
-            }
+            if (queue.length === 0) { currentTime++; continue; }
             
-            // Get next process from the queue
             const process = queue.shift();
-            
-            // Record start time if not started
             if (process.startTime === -1) {
                 process.startTime = currentTime;
                 process.responseTime = process.startTime - process.arrival;
             }
             
-            // Determine how long to run (min of quantum or remaining time)
             const runTime = Math.min(quantum, process.remaining);
-            
-            // Create Gantt block
             gantt.push({
                 process: process.id,
                 start: currentTime,
@@ -485,11 +357,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 queue: 0
             });
             
-            // Update process
             process.remaining -= runTime;
             currentTime += runTime;
             
-            // Add any processes that arrived during this time to the queue
             processes.forEach(p => {
                 if (p !== process && p.arrival <= currentTime && 
                     p.remaining > 0 && !queue.includes(p) && p !== queue[0]) {
@@ -497,42 +367,28 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
             
-            // If process not completed, add back to queue
             if (process.remaining > 0) {
                 queue.push(process);
             } else {
-                // Process completed
                 process.finishTime = currentTime;
                 completed++;
-                
-                // Calculate metrics
-                const turnaround = process.finishTime - process.arrival;
-                const waiting = turnaround - process.burst;
-                
                 metrics.push({
                     id: process.id,
                     arrival: process.arrival,
                     burst: process.burst,
                     finish: process.finishTime,
-                    turnaround: turnaround,
-                    waiting: waiting,
+                    turnaround: process.finishTime - process.arrival,
+                    waiting: (process.finishTime - process.arrival) - process.burst,
                     response: process.responseTime
                 });
             }
         }
-        
         return {gantt, metrics};
     }
     
-    // Multilevel Feedback Queue (MLFQ)
     function runMLFQ(processes, mlfqParams) {
-        let currentTime = 0;
-        let completed = 0;
-        const queues = [[], [], [], []];
-        const gantt = [];
-        const metrics = [];
-        
-        // Initialize processes
+        let currentTime = 0, completed = 0;
+        const queues = [[], [], [], []], gantt = [], metrics = [];
         processes.forEach(p => {
             p.remaining = p.burst;
             p.queue = 0;
@@ -541,7 +397,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         while (completed < processes.length) {
-            // Add arrived processes to Q0
             processes.forEach(p => {
                 if (p.arrival === currentTime && p.remaining > 0 && 
                     !queues[0].includes(p) && !queues[1].includes(p) && 
@@ -550,39 +405,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
             
-            // Find the highest priority non-empty queue
             let queueIndex = -1;
             for (let i = 0; i < 4; i++) {
-                if (queues[i].length > 0) {
-                    queueIndex = i;
-                    break;
-                }
+                if (queues[i].length > 0) { queueIndex = i; break; }
             }
             
-            if (queueIndex === -1) {
-                currentTime++;
-                continue;
-            }
+            if (queueIndex === -1) { currentTime++; continue; }
             
-            // Get next process from the queue
             const process = queues[queueIndex].shift();
-            
-            // Record start time if not started
             if (process.startTime === -1) {
                 process.startTime = currentTime;
                 process.responseTime = process.startTime - process.arrival;
             }
             
-            // Get queue parameters
             const queueParams = mlfqParams[queueIndex];
-            const runTime = Math.min(
-                1, // Run for 1 time unit
-                process.remaining,
-                queueParams.quantum - process.quantumUsed,
-                queueParams.allotment - process.queueTime
-            );
+            const runTime = Math.min(1, process.remaining, 
+                queueParams.quantum - process.quantumUsed, 
+                queueParams.allotment - process.queueTime);
             
-            // Create Gantt block
             gantt.push({
                 process: process.id,
                 start: currentTime,
@@ -590,13 +430,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 queue: queueIndex
             });
             
-            // Update process
             process.remaining -= runTime;
             process.quantumUsed += runTime;
             process.queueTime += runTime;
             currentTime += runTime;
             
-            // Add any processes that arrived during this time to Q0
             processes.forEach(p => {
                 if (p !== process && p.arrival <= currentTime && 
                     p.remaining > 0 && !queues[0].includes(p) && 
@@ -607,58 +445,44 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             
             if (process.remaining > 0) {
-                // Check if quantum expired
                 if (process.quantumUsed >= queueParams.quantum) {
-                    // Move to next lower queue (if available)
                     const newQueue = Math.min(3, queueIndex + 1);
                     queues[newQueue].push(process);
                     process.queue = newQueue;
                     process.quantumUsed = 0;
-                } 
-                // Check if allotment expired
-                else if (process.queueTime >= queueParams.allotment) {
-                    // Move to next lower queue (if available)
+                } else if (process.queueTime >= queueParams.allotment) {
                     const newQueue = Math.min(3, queueIndex + 1);
                     queues[newQueue].push(process);
                     process.queue = newQueue;
                     process.quantumUsed = 0;
                     process.queueTime = 0;
                 } else {
-                    // Put back in the same queue
                     queues[queueIndex].push(process);
                 }
             } else {
-                // Process completed
                 process.finishTime = currentTime;
                 completed++;
-                
-                // Calculate metrics
-                const turnaround = process.finishTime - process.arrival;
-                const waiting = turnaround - process.burst;
-                
                 metrics.push({
                     id: process.id,
                     arrival: process.arrival,
                     burst: process.burst,
                     finish: process.finishTime,
-                    turnaround: turnaround,
-                    waiting: waiting,
+                    turnaround: process.finishTime - process.arrival,
+                    waiting: (process.finishTime - process.arrival) - process.burst,
                     response: process.responseTime
                 });
             }
         }
-        
         return {gantt, metrics};
     }
     
-    // Updated displayResults() with precise time labels
+    // Updated displayResults with synchronized scrolling
     function displayResults(gantt, metrics) {
-        // Clear previous results
         ganttChart.innerHTML = '';
         metricsTable.querySelector('tbody').innerHTML = '';
         timeLabels.innerHTML = '';
 
-        // Display metrics (unchanged)
+        // Display metrics table
         let totalTurnaround = 0, totalWaiting = 0, totalResponse = 0;
         metrics.forEach(metric => {
             const row = document.createElement('tr');
@@ -677,32 +501,46 @@ document.addEventListener('DOMContentLoaded', function() {
             totalResponse += metric.response;
         });
 
-        // Calculate averages (unchanged)
+        // Calculate and display averages
         const count = metrics.length;
         document.getElementById('avgTurnaround').textContent = (totalTurnaround/count).toFixed(2);
         document.getElementById('avgWaiting').textContent = (totalWaiting/count).toFixed(2);
         document.getElementById('avgResponse').textContent = (totalResponse/count).toFixed(2);
 
-        // Real-time Gantt with precise time labels
+        // Create Gantt visualization
         if (gantt.length === 0) {
             ganttChart.innerHTML = '<div class="gantt-block">No processes scheduled</div>';
             return;
         }
 
         const maxTime = Math.max(...gantt.map(block => block.end));
-        const pxPerTimeUnit = 60; // Match CSS width calculation
+        const pxPerTimeUnit = 60;
         
-        // Generate accurate time labels
-        timeLabels.style.width = `${maxTime * pxPerTimeUnit}px`;
+        // Create scrollable container
+        const ganttContainer = document.createElement('div');
+        ganttContainer.className = 'gantt-container';
+        ganttContainer.style.width = `${maxTime * pxPerTimeUnit + 100}px`;
+        
+        // Create time labels row
+        const timeLabelRow = document.createElement('div');
+        timeLabelRow.className = 'time-label-row';
+        timeLabelRow.style.width = `${maxTime * pxPerTimeUnit}px`;
+        
+        // Create Gantt row
+        const ganttRow = document.createElement('div');
+        ganttRow.className = 'gantt-row';
+        ganttRow.style.width = `${maxTime * pxPerTimeUnit}px`;
+        
+        // Generate time labels
         for (let t = 0; t <= maxTime; t++) {
             const timeMark = document.createElement('div');
             timeMark.className = 'time-mark';
             timeMark.textContent = t;
             timeMark.style.left = `${t * pxPerTimeUnit}px`;
-            timeLabels.appendChild(timeMark);
+            timeLabelRow.appendChild(timeMark);
         }
-
-        // Animate Gantt blocks
+        
+        // Create Gantt blocks
         let cumulativeTime = 0;
         gantt.forEach(block => {
             const blockElement = document.createElement('div');
@@ -712,20 +550,29 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="start-time">${block.start}</div>
             `;
             
-            // Initial state
             blockElement.style.width = '0';
-            blockElement.style.opacity = '0.8';
-            ganttChart.appendChild(blockElement);
+            blockElement.style.left = `${block.start * pxPerTimeUnit}px`;
+            ganttRow.appendChild(blockElement);
 
             const duration = block.end - block.start;
             
             setTimeout(() => {
                 blockElement.style.transition = `width ${duration}s linear`;
                 blockElement.style.width = `${duration * pxPerTimeUnit}px`;
-                blockElement.style.opacity = '1';
             }, cumulativeTime * 1000);
             
             cumulativeTime += duration;
         });
+
+        // Build hierarchy
+        ganttContainer.appendChild(timeLabelRow);
+        ganttContainer.appendChild(ganttRow);
+        ganttChart.appendChild(ganttContainer);
+
+        // Synchronize scrolling
+        ganttChart.onscroll = function() {
+            timeLabelRow.style.transform = `translateX(-${this.scrollLeft}px)`;
+            ganttRow.style.transform = `translateX(-${this.scrollLeft}px)`;
+        };
     }
 });
