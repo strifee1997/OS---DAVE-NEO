@@ -109,11 +109,12 @@ button.removeBtn:hover {
 }
 .gantt-time {
     position: absolute;
-    bottom: -25px;
+    bottom: -20px;
     left: 0;
     right: 0;
-    font-size: 0.8rem;
-    color: #666;
+    text-align: center;
+    font-size: 11px;
+    color: #667;
 }
 
 .gantt-block.animated {
@@ -193,12 +194,35 @@ button.removeBtn:hover {
     display: flex;
     justify-content: space-between;
     padding: 0 10px;
-    margin-top: 30px;
+    position: relative;
+    height: 20px;
+    margin-top: 10px;
 }
 .time-label span {
     display: inline-block;
     width: 60px; /* Match Gantt block width per time unit */
     text-align: center;
+}
+
+.time-mark {
+    position: absolute;
+    transform: translateX(-50%);
+    font-size: 12px;
+    color: #666;
+}
+.process-id {
+    text-align: center;
+    padding-top: 10px;
+}
+
+.start-time {
+    position: absolute;
+    bottom: -20px;
+    left: 0;
+    right: 0;
+    text-align: center;
+    font-size: 11px;
+    color: #666;
 }
 .results-section {
     margin-top: 30px;
