@@ -50,7 +50,8 @@ document.addEventListener('DOMContentLoaded', function() {
         const algo = this.value;
         algorithmInfo.textContent = algorithmDescriptions[algo];
         
-        if (algo === 'RR' || algo === 'MLFQ') {
+        // Only show quantum for RR, not for MLFQ
+        if (algo === 'RR') {
             quantumSection.style.display = 'block';
         } else {
             quantumSection.style.display = 'none';
