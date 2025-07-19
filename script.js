@@ -385,96 +385,97 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         return {gantt, metrics};
     }
-    
-    function runMLFQ(processes, mlfqParams) {
-        let currentTime = 0, completed = 0;
-        const queues = [[], [], [], []], gantt = [], metrics = [];
+    //NEW MLFQ
+function runMLFQ(processes, mlfqParams) {
+    let currentTime = 0, completed = 0;
+    const queues = [[], [], [], []], gantt = [], metrics = [];
+
+    processes.forEach(p => {
+        p.remaining = p.burst;
+        p.queue = 0;
+        p.queueTime = 0;
+        p.quantumUsed = 0;
+        p.startTime = -1;         // <-- Ensure this is reset
+        p.responseTime = -1;      // <-- Ensure this is reset
+    });
+
+    while (completed < processes.length) {
+        // Add arriving processes to Q0
         processes.forEach(p => {
-            p.remaining = p.burst;
-            p.queue = 0;
-            p.queueTime = 0;
-            p.quantumUsed = 0;
+            if (p.arrival === currentTime && p.remaining > 0 &&
+                !queues.some(q => q.includes(p))) {
+                queues[0].push(p);
+            }
         });
-        
-        while (completed < processes.length) {
-            processes.forEach(p => {
-                if (p.arrival === currentTime && p.remaining > 0 && 
-                    !queues[0].includes(p) && !queues[1].includes(p) && 
-                    !queues[2].includes(p) && !queues[3].includes(p)) {
-                    queues[0].push(p);
-                }
-            });
-            
-            let queueIndex = -1;
-            for (let i = 0; i < 4; i++) {
-                if (queues[i].length > 0) { queueIndex = i; break; }
-            }
-            
-            if (queueIndex === -1) { currentTime++; continue; }
-            
-            const process = queues[queueIndex].shift();
-            if (process.startTime === -1) {
-                process.startTime = currentTime;
-                process.responseTime = process.startTime - process.arrival;
-            }
-            
-            const queueParams = mlfqParams[queueIndex];
-            const runTime = Math.min(1, process.remaining, 
-                queueParams.quantum - process.quantumUsed, 
-                queueParams.allotment - process.queueTime);
-            
-            gantt.push({
-                process: process.id,
-                start: currentTime,
-                end: currentTime + runTime,
-                queue: queueIndex
-            });
-            
-            process.remaining -= runTime;
-            process.quantumUsed += runTime;
-            process.queueTime += runTime;
-            currentTime += runTime;
-            
-            processes.forEach(p => {
-                if (p !== process && p.arrival <= currentTime && 
-                    p.remaining > 0 && !queues[0].includes(p) && 
-                    !queues[1].includes(p) && !queues[2].includes(p) && 
-                    !queues[3].includes(p)) {
-                    queues[0].push(p);
-                }
-            });
-            
-            if (process.remaining > 0) {
-                if (process.quantumUsed >= queueParams.quantum) {
-                    const newQueue = Math.min(3, queueIndex + 1);
-                    queues[newQueue].push(process);
-                    process.queue = newQueue;
-                    process.quantumUsed = 0;
-                } else if (process.queueTime >= queueParams.allotment) {
-                    const newQueue = Math.min(3, queueIndex + 1);
-                    queues[newQueue].push(process);
-                    process.queue = newQueue;
-                    process.quantumUsed = 0;
-                    process.queueTime = 0;
-                } else {
-                    queues[queueIndex].push(process);
-                }
-            } else {
-                process.finishTime = currentTime;
-                completed++;
-                metrics.push({
-                    id: process.id,
-                    arrival: process.arrival,
-                    burst: process.burst,
-                    finish: process.finishTime,
-                    turnaround: process.finishTime - process.arrival,
-                    waiting: (process.finishTime - process.arrival) - process.burst,
-                    response: process.responseTime
-                });
-            }
+
+        // Find the first non-empty queue
+        let queueIndex = queues.findIndex(q => q.length > 0);
+        if (queueIndex === -1) {
+            currentTime++;
+            continue;
         }
-        return {gantt, metrics};
+
+        const process = queues[queueIndex].shift();
+
+        // Set start time & response time ONCE
+        if (process.startTime === -1) {
+            process.startTime = currentTime;
+            process.responseTime = currentTime - process.arrival;
+        }
+
+        const params = mlfqParams[queueIndex];
+        const runTime = Math.min(1, process.remaining,
+                                 params.quantum - process.quantumUsed,
+                                 params.allotment - process.queueTime);
+
+        gantt.push({
+            process: process.id,
+            start: currentTime,
+            end: currentTime + runTime,
+            queue: queueIndex
+        });
+
+        process.remaining -= runTime;
+        process.quantumUsed += runTime;
+        process.queueTime += runTime;
+        currentTime += runTime;
+
+        // Add any new arrivals during this run
+        processes.forEach(p => {
+            if (p !== process && p.arrival <= currentTime && p.remaining > 0 &&
+                !queues.some(q => q.includes(p))) {
+                queues[0].push(p);
+            }
+        });
+
+        // Decide where to requeue the process
+        if (process.remaining > 0) {
+            if (process.quantumUsed >= params.quantum || process.queueTime >= params.allotment) {
+                const newQueue = Math.min(3, queueIndex + 1);
+                process.queue = newQueue;
+                process.quantumUsed = 0;
+                process.queueTime = 0;
+                queues[newQueue].push(process);
+            } else {
+                queues[queueIndex].push(process);
+            }
+        } else {
+            process.finishTime = currentTime;
+            completed++;
+            metrics.push({
+                id: process.id,
+                arrival: process.arrival,
+                burst: process.burst,
+                finish: process.finishTime,
+                turnaround: process.finishTime - process.arrival,
+                waiting: (process.finishTime - process.arrival) - process.burst,
+                response: process.responseTime
+            });
+        }
     }
+
+    return { gantt, metrics };
+}
     
     // Updated displayResults with synchronized scrolling
     function displayResults(gantt, metrics) {
