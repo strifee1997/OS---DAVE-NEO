@@ -1,8 +1,8 @@
-body { 
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f5f7fa;
+    background-color: #FFF0DB;
     color: #333;
 }
 .container {
@@ -18,7 +18,7 @@ header {
     text-align: center;
     margin-bottom: 30px;
     padding: 20px;
-    background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+    background: linear-gradient(135deg, #959595 0%, #ff9808 100%);
     color: white;
     border-radius: 10px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
