@@ -1,5 +1,5 @@
 # OS---DAVE-NEO
-DEB303 - Dave Torrefranca
+DEB303 - Dave Torrefranca\n
 strife1997 - Neo Kent Durano
 
                   INTRODUCTION
