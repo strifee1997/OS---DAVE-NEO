@@ -8,4 +8,6 @@ We created this project to turn theoretical scheduling concepts into a more visu
 -Web-based Gantt Chart Visualizations to show how processes are scheduled over time.
 -Custom Input Fields for users to enter arrival time, burst time, priorities, and more.
 -Live Calculation of Metrics, including average waiting time, turnaround time, and CPU utilization.
--Interactive Controls to start, pause, or step through simulations.      
+-Interactive Controls to start, pause, or step through simulations.  
+
+               
