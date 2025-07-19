@@ -1,6 +1,5 @@
 # OS---DAVE-NEO
-DEB303 - Dave Torrefranca\n
-strife1997 - Neo Kent Durano
+DEB303 - Dave Torrefranca | strife1997 - Neo Kent Durano
 
                   INTRODUCTION
 Our CPU Scheduler Visualization Project is a web-based interactive tool we developed to simulate and visualize how various CPU scheduling algorithms operate. The goal of this project is to help students, educators, and learners understand the effects of different scheduling strategies on process execution, waiting time, turnaround time, and CPU efficiency. 
