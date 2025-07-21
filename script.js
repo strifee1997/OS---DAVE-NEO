@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const quantumSection = document.getElementById('quantumSection');
     const mlfqControls = document.getElementById('mlfqControls');
     const runSimulationBtn = document.getElementById('runSimulation');
+    const exportResultsBtn = document.getElementById('exportResults');
     const ganttChart = document.getElementById('ganttChart');
     const metricsTable = document.getElementById('metricsTable');
     const queueLegend = document.getElementById('queueLegend');
@@ -72,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (tbody.rows.length > 1) {
                 row.remove();
                 const rows = tbody.querySelectorAll('tr');
-                rows.forEach((r, i) => r.cells[0].textContent = `P${i}`);
+                rows.forEach((r, i) => r.cells[0].textContent = `P${i+1}`);
             } else {
                 alert('You need at least one process!');
             }
@@ -82,22 +83,28 @@ document.addEventListener('DOMContentLoaded', function() {
     // Add process button
     addProcessBtn.addEventListener('click', function() {
         const tbody = processTable.querySelector('tbody');
-        const rowCount = tbody.rows.length;
+        // Find the highest process number currently in the table
+        let maxNum = 0;
+        tbody.querySelectorAll('tr').forEach(row => {
+            const idText = row.cells[0].textContent;
+            const match = idText.match(/^P(\d+)$/);
+            if (match) {
+                const num = parseInt(match[1]);
+                if (num > maxNum) maxNum = num;
+            }
+        });
+        const nextNum = maxNum + 1;
         const row = document.createElement('tr');
-        
         row.innerHTML = `
-            <td>P${rowCount}</td>
-            <td><input type="number" class="arrival" value="${rowCount}" min="0"></td>
+            <td>P${nextNum}</td>
+            <td><input type="number" class="arrival" value="${nextNum-1}" min="0"></td>
             <td><input type="number" class="burst" value="${Math.floor(Math.random() * 10) + 1}" min="1"></td>
             <td><button class="removeBtn">Remove</button></td>
         `;
-        
         tbody.appendChild(row);
         row.querySelector('.removeBtn').addEventListener('click', function() {
             if (tbody.rows.length > 1) {
                 row.remove();
-                const rows = tbody.querySelectorAll('tr');
-                rows.forEach((r, i) => r.cells[0].textContent = `P${i}`);
             } else {
                 alert('You need at least one process!');
             }
@@ -108,9 +115,8 @@ document.addEventListener('DOMContentLoaded', function() {
     generateRandomBtn.addEventListener('click', function() {
         const tbody = processTable.querySelector('tbody');
         tbody.innerHTML = '';
-        const processCount = Math.floor(Math.random() * 5) + 3;
-        
-        for (let i = 0; i < processCount; i++) {
+        const processCount = Math.floor(Math.random() * 5) + 1;
+        for (let i = 1; i <= processCount; i++) {
             const row = document.createElement('tr');
             row.innerHTML = `
                 <td>P${i}</td>
@@ -122,8 +128,6 @@ document.addEventListener('DOMContentLoaded', function() {
             row.querySelector('.removeBtn').addEventListener('click', function() {
                 if (tbody.rows.length > 1) {
                     row.remove();
-                    const rows = tbody.querySelectorAll('tr');
-                    rows.forEach((r, idx) => r.cells[0].textContent = `P${idx}`);
                 } else {
                     alert('You need at least one process!');
                 }
@@ -139,7 +143,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const defaultRow = document.createElement('tr');
         defaultRow.innerHTML = `
-            <td>P0</td>
+            <td>P1</td>
             <td><input type="number" class="arrival" value="0" min="0"></td>
             <td><input type="number" class="burst" value="5" min="1"></td>
             <td><button class="removeBtn">Remove</button></td>
@@ -149,8 +153,6 @@ document.addEventListener('DOMContentLoaded', function() {
         defaultRow.querySelector('.removeBtn').addEventListener('click', function() {
             if (tbody.rows.length > 1) {
                 defaultRow.remove();
-                const rows = tbody.querySelectorAll('tr');
-                rows.forEach((r, i) => r.cells[0].textContent = `P${i}`);
             } else {
                 alert('You need at least one process!');
             }
@@ -170,7 +172,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const rows = processTable.querySelectorAll('tbody tr');
         rows.forEach((row, i) => {
             processes.push({
-                id: `P${i}`,
+                id: row.cells[0].textContent,
                 arrival: parseInt(row.querySelector('.arrival').value),
                 burst: parseInt(row.querySelector('.burst').value),
                 remaining: parseInt(row.querySelector('.burst').value),
@@ -184,30 +186,86 @@ document.addEventListener('DOMContentLoaded', function() {
         const quantum = algorithm === 'RR' || algorithm === 'MLFQ' ? 
             parseInt(document.getElementById('quantum').value) : 0;
         
+        // Collect MLFQ params if needed
+        let mlfqParams = null;
+        if (algorithm === 'MLFQ') {
+            const quantumInputs = document.querySelectorAll('.mlfq-quantum');
+            const allotmentInputs = document.querySelectorAll('.mlfq-allotment');
+            mlfqParams = Array.from(quantumInputs).map((q, i) => ({
+                quantum: parseInt(q.value),
+                allotment: parseInt(allotmentInputs[i].value)
+            }));
+        }
         let results;
         switch (algorithm) {
             case 'FCFS': results = runFCFS([...processes]); break;
             case 'SJF': results = runSJF([...processes]); break;
             case 'SRTF': results = runSRTF([...processes]); break;
             case 'RR': results = runRR([...processes], quantum); break;
-            case 'MLFQ': 
-                const mlfqParams = [];
-                document.querySelectorAll('#mlfqControls tbody tr').forEach(row => {
-                    mlfqParams.push({
-                        quantum: parseInt(row.querySelector('.mlfq-quantum').value),
-                        allotment: parseInt(row.querySelector('.mlfq-allotment').value)
-                    });
-                });
-                results = runMLFQ([...processes], mlfqParams);
-                break;
+            case 'MLFQ': results = runMLFQ([...processes], mlfqParams); break;
             default: results = {gantt: [], metrics: []};
         }
         
         displayResults(results.gantt, results.metrics);
+
+        window.lastSimulationResults = {
+            gantt: results.gantt,
+            metrics: results.metrics,
+            algorithm: algorithm,
+            quantum: quantum,
+            mlfqParams: algorithm === 'MLFQ' ? mlfqParams : null
+        };
     });
     
     // Scheduling Algorithms
     function runFCFS(processes) {
+
+    // Export Results Functionality
+    exportResultsBtn.addEventListener('click', function() {
+        const results = window.lastSimulationResults;
+        if (!results || !results.metrics || results.metrics.length === 0) {
+            alert('No simulation results to export!');
+            return;
+        }
+
+        let txt = '';
+        txt += `CPU Scheduling Simulator Results\n`;
+        txt += `Algorithm: ${results.algorithm}`;
+        if (results.algorithm === 'RR') txt += ` (Quantum: ${results.quantum})`;
+        if (results.algorithm === 'MLFQ' && results.mlfqParams) {
+            txt += `\nMLFQ Parameters:`;
+            results.mlfqParams.forEach((q, i) => {
+                txt += `\n  Q${i}: Quantum=${q.quantum}, Allotment=${q.allotment}`;
+            });
+        }
+        txt += '\n\n--- Gantt Chart ---\n';
+        txt += 'Process\tStart\tEnd\tQueue\n';
+        results.gantt.forEach(g => {
+            txt += `${g.process}\t${g.start}\t${g.end}\tQ${g.queue}\n`;
+        });
+
+        txt += '\n--- Process Metrics ---\n';
+        txt += 'ID\tArrival\tBurst\tCompletion\tTurnaround\tWaiting\tResponse\n';
+        results.metrics.forEach(m => {
+            txt += `${m.id}\t${m.arrival}\t${m.burst}\t${m.finish}\t${m.turnaround}\t${m.waiting}\t${m.response}\n`;
+        });
+
+        // Calculate averages
+        const avg = (arr) => arr.reduce((a, b) => a + b, 0) / arr.length;
+        txt += '\nAverages:\n';
+        txt += `Turnaround: ${avg(results.metrics.map(m => m.turnaround)).toFixed(2)}\n`;
+        txt += `Waiting: ${avg(results.metrics.map(m => m.waiting)).toFixed(2)}\n`;
+        txt += `Response: ${avg(results.metrics.map(m => m.response)).toFixed(2)}\n`;
+
+        // Download as txt file
+        const blob = new Blob([txt], {type: 'text/plain'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'cpu_scheduling_results.txt';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    });
         processes.sort((a, b) => a.arrival - b.arrival);
         let currentTime = 0;
         const gantt = [], metrics = [];
