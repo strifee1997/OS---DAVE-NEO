@@ -28,21 +28,9 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td>P0</td>
+                        <td>P1</td>
                         <td><input type="number" class="arrival" value="0" min="0"></td>
                         <td><input type="number" class="burst" value="5" min="1"></td>
-                        <td><button class="removeBtn">Remove</button></td>
-                    </tr>
-                    <tr>
-                        <td>P1</td>
-                        <td><input type="number" class="arrival" value="1" min="0"></td>
-                        <td><input type="number" class="burst" value="3" min="1"></td>
-                        <td><button class="removeBtn">Remove</button></td>
-                    </tr>
-                    <tr>
-                        <td>P2</td>
-                        <td><input type="number" class="arrival" value="2" min="0"></td>
-                        <td><input type="number" class="burst" value="8" min="1"></td>
                         <td><button class="removeBtn">Remove</button></td>
                     </tr>
                 </tbody>
@@ -113,6 +101,7 @@
         <div class="section results-section">
             <h2>Simulation Results</h2>
             <button id="runSimulation">Run Simulation</button>
+            <button id="exportResults">Export Results</button>
 
             <div class="speed-control">
     <label>Animation Speed: </label>
@@ -120,6 +109,7 @@
         <option value="2">0.5x Slow</option>
         <option value="1" selected>1x Normal</option>
         <option value="0.5">2x Fast</option>
+        <option value="0.25">4x Fastest</option>
     </select>
 </div>
             <div id="ganttContainer">
